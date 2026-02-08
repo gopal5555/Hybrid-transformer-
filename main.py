@@ -14,11 +14,11 @@ def load_models():
     global ann_model, transformer_model
 
     ann_model = torch.load(
-        "models/ann_model.pt",
+        "ann_model.pt",
         map_location="cpu"
     )
     transformer_model = torch.load(
-        "models/transformer_model.pth",
+        "transformer_model.pth",
         map_location="cpu"
     )
 

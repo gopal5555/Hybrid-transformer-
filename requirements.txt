@@ -6,4 +6,4 @@ scikit-learn
 joblib
 
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.1.2
+torch==2.5.1+cpu

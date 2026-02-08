@@ -1,40 +1,26 @@
-from fastapi import FastAPI
-import torch
-
-app = FastAPI()   # ← yeh line missing thi
-
-# -------------------------
-# Startup: model load
-# -------------------------
-ann_model = None
-transformer_model = None
-
 @app.on_event("startup")
 def load_models():
-    global ann_model, transformer_model
+    global ann_model, transformer_model, ann_scaler
 
-    ann_model = torch.load(
-        "ann_model.pt",
-        map_location="cpu"
+    # ANN
+    ann_model = SimpleANN(input_dim=6)
+    ann_model.load_state_dict(
+        torch.load("ann_model.pt", map_location="cpu")
     )
-    transformer_model = torch.load(
-        "transformer_model.pth",
-        map_location="cpu"
-    )
-
     ann_model.eval()
+
+    # Transformer
+    transformer_model = TransformerModel(input_dim=6)
+    transformer_model.load_state_dict(
+        torch.load("transformer_model.pth", map_location="cpu")
+    )
     transformer_model.eval()
 
-    print("✅ Models loaded")
+    # Scaler
+    with open("ann_scaler.pkl", "rb") as f:
+        ann_scaler = pickle.load(f)
 
-# -------------------------
-# Health check
-# -------------------------
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-# -------------------------
+    print("✅ Models loaded correctly")# -------------------------
 # Test API (safe)
 # -------------------------
 @app.get("/")

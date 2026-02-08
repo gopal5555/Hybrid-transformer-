@@ -1,6 +1,11 @@
-# main.py (top)
+from fastapi import FastAPI
 import torch
 
+app = FastAPI()   # ← yeh line missing thi
+
+# -------------------------
+# Startup: model load
+# -------------------------
 ann_model = None
 transformer_model = None
 
@@ -20,4 +25,18 @@ def load_models():
     ann_model.eval()
     transformer_model.eval()
 
-    print("✅ Models loaded successfully")
+    print("✅ Models loaded")
+
+# -------------------------
+# Health check
+# -------------------------
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+# -------------------------
+# Test API (safe)
+# -------------------------
+@app.get("/")
+def root():
+    return {"message": "API running"}

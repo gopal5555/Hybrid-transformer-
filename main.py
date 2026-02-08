@@ -1,34 +1,39 @@
 from fastapi import FastAPI
-import pandas as pd
 from datetime import datetime
+import os
 
-app = FastAPI()
+app = FastAPI(title="Hybrid Trading Backend")
 
-HISTORY_FILE = "data/signals_history.csv"
+# ===== GLOBAL FLAGS (ye already load ke time set ho chuke honge) =====
+ANN_MODEL_LOADED = True          # jab ann_model load ho
+TRANSFORMER_LOADED = True        # jab transformer load ho
+DATA_FILE = "data/stocks_daily.csv"
+
+STOP_LOSS = -0.01     # -1%
+TARGET   = 0.06       # +6%
+UNIVERSE = "NIFTY 50"
+
 
 @app.get("/health")
-def health():
-    return {"status": "ok"}
+def health_check():
+    # data updated date
+    if os.path.exists(DATA_FILE):
+        updated_at = datetime.fromtimestamp(
+            os.path.getmtime(DATA_FILE)
+        ).strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        updated_at = "data not found"
 
-@app.get("/history")
-def history(days: int = 5):
-    df = pd.read_csv(HISTORY_FILE)
-    df["date"] = pd.to_datetime(df["date"])
-    cutoff = pd.Timestamp.today() - pd.Timedelta(days=days)
-    df = df[df["date"] >= cutoff]
-    return df.sort_values("date", ascending=False).to_dict("records")
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def root():
     return {
-        "status": "running",
-        "message": "Hybrid ANN + Transformer API live",
-        "endpoints": [
-            "/health",
-            "/predict",
-            "/history/{symbol}"
-        ]
+        "status": "OK",
+        "backend": "running",
+        "ann_model_loaded": ANN_MODEL_LOADED,
+        "transformer_loaded": TRANSFORMER_LOADED,
+        "data_last_updated": updated_at,
+        "universe": UNIVERSE,
+        "risk_params": {
+            "stop_loss": STOP_LOSS,
+            "target": TARGET
+        },
+        "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }

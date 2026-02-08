@@ -17,3 +17,18 @@ def history(days: int = 5):
     cutoff = pd.Timestamp.today() - pd.Timedelta(days=days)
     df = df[df["date"] >= cutoff]
     return df.sort_values("date", ascending=False).to_dict("records")
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {
+        "status": "running",
+        "message": "Hybrid ANN + Transformer API live",
+        "endpoints": [
+            "/health",
+            "/predict",
+            "/history/{symbol}"
+        ]
+    }
